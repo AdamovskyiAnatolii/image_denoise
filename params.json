@@ -1,0 +1,17 @@
+{
+  "res_layers": 16,
+  "num_workers": 4,
+  "input_channels": 3,
+  "output_channels": 64,
+  "lr": 0.005,
+  "batch_size": 64,
+  "train_dataset": "animal_dataset_intermediate/train",
+  "val_dataset": "animal_dataset_intermediate/test",
+  "test_dataset": "dataset/train",
+  "train_crop_size": 64,
+  "val_crop_size": 64,
+  "test_crop_size": 64,
+  "train_noise_model": ["gaussian", 80],
+  "val_noise_model": ["gaussian", 80],
+  "test_noise_model": ["gaussian", 50],
+}
