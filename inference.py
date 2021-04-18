@@ -64,7 +64,7 @@ class Cleaner:
             params = json.load(file)
         for name in os.listdir(self.checkpoints_dir):
             self.models.append(Net(**params))
-            self.models.load_state_dict(
+            self.models[-1].load_state_dict(
                 torch.load(os.path.join(self.checkpoints_dir, name))[
                     "state_dict"
                 ]
