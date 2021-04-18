@@ -13,6 +13,8 @@ class NoisyDataset(Dataset):
         crop_size=128,
         train_noise_model=("gaussian", 50),
         clean_target=False,
+        noise_static=False,
+        crop_seed=None
     ):
         self.root_dir = root_dir
         self.crop_size = crop_size
@@ -20,8 +22,12 @@ class NoisyDataset(Dataset):
         self.noise = train_noise_model[0]
         self.noise_param = train_noise_model[1]
         self.image_name_list = os.listdir(root_dir)
+        self.noise_static = noise_static
+        self.crop_seed = crop_seed
 
     def _random_crop_to_size(self, imgs):
+        if self.crop_seed is not None:
+            np.random.seed(self.crop_seed)
 
         w, h = imgs[0].size
         assert (
@@ -49,7 +55,10 @@ class NoisyDataset(Dataset):
         w, h = image.size
         c = len(image.getbands())
 
-        std = np.random.uniform(0, self.noise_param)
+        if self.noise_static:
+            std = self.noise_param
+        else:
+            std = np.random.uniform(0, self.noise_param)
         _n = np.random.normal(0, std, (h, w, c))
         noisy_image = np.array(image) + _n
 
@@ -65,7 +74,10 @@ class NoisyDataset(Dataset):
         Multiplicative bernoulli
         """
         sz = np.array(image).shape[0]
-        prob_ = random.uniform(0, self.noise_param)
+        if self.noise_static:
+            prob_ = self.noise_param
+        else:
+            prob_ = random.uniform(0, self.noise_param)
         mask = np.random.choice([0, 1], size=(sz, sz), p=[prob_, 1 - prob_])
         mask = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
         return {
@@ -100,17 +112,11 @@ class NoisyDataset(Dataset):
             source_img_dict["mask"] = tvF.to_tensor(source_img_dict["mask"])
 
         if self.clean_target:
-            # print('clean target')
             target = tvF.to_tensor(image)
         else:
-            # print('corrupt target')
             _target_dict = self.corrupt_image(image)
             target = tvF.to_tensor(_target_dict["image"])
-
-        if source_img_dict["use_mask"]:
-            return [source_img_dict["image"], source_img_dict["mask"], target]
-        else:
-            return [source_img_dict["image"], None, target]
+        return source_img_dict["image"], target
 
     def __len__(self):
         return len(self.image_name_list)
