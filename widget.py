@@ -46,12 +46,7 @@ class Widget:
             readout_format="d",
         )
         self.dataset_name = widgets.RadioButtons(
-            options=[
-                "../dataset/valid/",
-                "../dataset/train/",
-                "../animal_dataset_intermediate/train",
-                "../animal_dataset_intermediate/test",
-            ],
+            options=[os.path.join("datasets", path) for path in os.listdir("datasets")],
             description="Dataset name:",
             disabled=False,
         )
