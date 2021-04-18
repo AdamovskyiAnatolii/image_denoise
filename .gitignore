@@ -1,1 +1,3 @@
 .idea
+lightning_logs/version_*/*.yaml
+lightning_logs/version_*/events.*
