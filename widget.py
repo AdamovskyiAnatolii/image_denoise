@@ -52,11 +52,21 @@ class Widget:
             self.img_widget = widgets.Image(
                 value=file.read(), format="png", width=600, height=1200,
             )
-
+        self.dataset_name = widgets.RadioButtons(
+            options=[
+                "dataset/valid/",
+                "dataset/train/",
+                "animal_dataset_intermediate/train",
+                "animal_dataset_intermediate/train",
+            ],
+            description="Dataset name:",
+            disabled=False,
+        )
         self.noise_type.observe(self.callback, names="value")
         self.noise_level.observe(self.callback, names="value")
         self.speed_radio.observe(self.callback, names="value")
         self.image_index.observe(self.callback, names="value")
+        self.dataset_name.observe(self.callback, names="value")
 
         self.accordion = widgets.Accordion(
             children=[
@@ -66,6 +76,7 @@ class Widget:
                 self.noise_level,
                 self.img_widget,
                 self.crop_seed,
+                self.dataset_name,
             ],
         )
         self.accordion.set_title(0, "Noise type")
@@ -74,6 +85,7 @@ class Widget:
         self.accordion.set_title(3, "Noise")
         self.accordion.set_title(4, "Image")
         self.accordion.set_title(5, "Random crop")
+        self.accordion.set_title(6, "Dataset name")
 
     def show(self):
         return self.accordion
@@ -97,7 +109,7 @@ class Widget:
             f"Run: inx= {self.image_index.value}, speed = {self.speed_radio.value}, noise = {self.noise_level.value}"
         )
         dataset = NoisyDataset(
-            "dataset/valid/",
+            self.dataset_name.value,
             crop_size=128,
             clean_target=True,
             train_noise_model=(self.noise_type.value, self.noise_level.value,),
