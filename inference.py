@@ -55,19 +55,19 @@ class Cleaner:
 
     def run_all_d4(self, image):
         return np.mean(
-            [self.run_one_d4(model, image) for model in self.models], axis=0,
+            [self.run_one_d4(image, inx) for inx in range(len(self.models))],
+            axis=0,
         )
 
     def load_checkpoints(self):
         with open(self.params) as file:
             params = json.load(file)
         for name in os.listdir(self.checkpoints_dir):
-            self.models.append(
-                Net(**params).load_state_dict(
-                    torch.load(os.path.join(self.checkpoints_dir, name))[
-                        "state_dict"
-                    ]
-                )
+            self.models.append(Net(**params))
+            self.models.load_state_dict(
+                torch.load(os.path.join(self.checkpoints_dir, name))[
+                    "state_dict"
+                ]
             )
 
 

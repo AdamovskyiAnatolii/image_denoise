@@ -22,21 +22,43 @@ class Widget:
             description="Speed:",
             disabled=False,
         )
-        self.noise_level = widgets.FloatSlider(
+        self.bernoulli_noise_level = widgets.FloatSlider(
             value=0.3,
             min=0,
             max=1.0,
             step=0.05,
-            description="Noise:",
+            description="Bernoulli Noise:",
             disabled=False,
             continuous_update=False,
             readout=True,
             readout_format=".2f",
         )
+        self.gaussian_noise_level = widgets.IntSlider(
+            value=30,
+            min=0,
+            max=100,
+            step=1,
+            description="Gaussian Noise:",
+            disabled=False,
+            continuous_update=False,
+            orientation="horizontal",
+            readout=True,
+            readout_format="d",
+        )
+        self.dataset_name = widgets.RadioButtons(
+            options=[
+                "../dataset/valid/",
+                "../dataset/train/",
+                "../animal_dataset_intermediate/train",
+                "../animal_dataset_intermediate/test",
+            ],
+            description="Dataset name:",
+            disabled=False,
+        )
         self.image_index = widgets.IntSlider(
             value=0,
             min=0,
-            max=len(os.listdir("dataset/valid/")),
+            max=len(os.listdir(self.dataset_name.value)),
             step=1,
             description="Index:",
             disabled=False,
@@ -52,18 +74,10 @@ class Widget:
             self.img_widget = widgets.Image(
                 value=file.read(), format="png", width=600, height=1200,
             )
-        self.dataset_name = widgets.RadioButtons(
-            options=[
-                "dataset/valid/",
-                "dataset/train/",
-                "animal_dataset_intermediate/train",
-                "animal_dataset_intermediate/train",
-            ],
-            description="Dataset name:",
-            disabled=False,
-        )
+
         self.noise_type.observe(self.callback, names="value")
-        self.noise_level.observe(self.callback, names="value")
+        self.bernoulli_noise_level.observe(self.callback, names="value")
+        self.gaussian_noise_level.observe(self.callback, names="value")
         self.speed_radio.observe(self.callback, names="value")
         self.image_index.observe(self.callback, names="value")
         self.dataset_name.observe(self.callback, names="value")
@@ -73,7 +87,8 @@ class Widget:
                 self.noise_type,
                 self.image_index,
                 self.speed_radio,
-                self.noise_level,
+                self.bernoulli_noise_level,
+                self.gaussian_noise_level,
                 self.img_widget,
                 self.crop_seed,
                 self.dataset_name,
@@ -82,10 +97,11 @@ class Widget:
         self.accordion.set_title(0, "Noise type")
         self.accordion.set_title(1, "Index")
         self.accordion.set_title(2, "Speed")
-        self.accordion.set_title(3, "Noise")
-        self.accordion.set_title(4, "Image")
-        self.accordion.set_title(5, "Random crop")
-        self.accordion.set_title(6, "Dataset name")
+        self.accordion.set_title(3, "Bernoulli Noise")
+        self.accordion.set_title(4, "Gaussian Noise")
+        self.accordion.set_title(5, "Image")
+        self.accordion.set_title(6, "Random crop")
+        self.accordion.set_title(7, "Dataset name")
 
     def show(self):
         return self.accordion
@@ -93,7 +109,7 @@ class Widget:
     def run_model(self, image):
         model = (
             self.bernoulli_model
-            if self.noise_type.value == "bernoulli_model"
+            if self.noise_type.value == "multiplicative_bernoulli"
             else self.gaussian_model
         )
         if self.speed_radio.value == "long":
@@ -105,14 +121,19 @@ class Widget:
         return res
 
     def callback(self, _):
+        noise_level = (
+            self.bernoulli_noise_level.value
+            if self.noise_type.value == "multiplicative_bernoulli"
+            else self.gaussian_noise_level.value
+        )
         print(
-            f"Run: inx= {self.image_index.value}, speed = {self.speed_radio.value}, noise = {self.noise_level.value}"
+            f"Run: inx= {self.image_index.value}, speed = {self.speed_radio.value}, noise = {noise_level}"
         )
         dataset = NoisyDataset(
             self.dataset_name.value,
             crop_size=128,
             clean_target=True,
-            train_noise_model=(self.noise_type.value, self.noise_level.value,),
+            train_noise_model=(self.noise_type.value, noise_level,),
             noise_static=True,
             crop_seed=42 if not self.crop_seed.value else None,
         )
