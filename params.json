@@ -13,5 +13,5 @@
   "test_crop_size": 64,
   "train_noise_model": ["gaussian", 80],
   "val_noise_model": ["gaussian", 80],
-  "test_noise_model": ["gaussian", 50],
+  "test_noise_model": ["gaussian", 50]
 }
