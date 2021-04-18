@@ -1,34 +1,11 @@
-model.py
-Без спільного доступу
-Тип
-Текст
-Розмір
-7 КБ (6 857 байтів)
-Використовується
-12 КБ (12 424 байти)
-Розташування
-lightning
-Власник
-я
-Змінено
-17 квіт. 2021 р. (мною)
-Відкрито
-16:43 (мною)
-Створено
-15 квіт. 2021 р. у додатку Google Drive Web
-Додати опис
-Користувачі з правами перегляду можуть завантажувати файл
-
-import os
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
 from piq import psnr
+from torch.utils.data import DataLoader
 
-
-import pytorch_lightning as pl
-from .dataset import NoisyDataset
+from dataset import NoisyDataset
 
 
 class ConvBlock(nn.Module):
@@ -162,7 +139,7 @@ class Net(pl.LightningModule):
         #     y = y * mask
         #     y_hat = y_hat * mask
 
-        loss_mse = F.mse_loss(y_hat, y, reduction='mean')
+        loss_mse = F.mse_loss(y_hat, y, reduction="mean")
         psnr_loss = psnr(y_hat.clip(0, 1), y.clip(0, 1))
 
         return (
@@ -172,7 +149,11 @@ class Net(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log_dict({f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False)
+        self.log_dict(
+            {f"train_{k}": v for k, v in logs.items()},
+            on_step=True,
+            on_epoch=False,
+        )
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -198,7 +179,7 @@ class Net(pl.LightningModule):
             ),
             batch_size=self.batch_size,
             shuffle=True,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
 
     def val_dataloader(self):
@@ -211,7 +192,7 @@ class Net(pl.LightningModule):
             ),
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
 
     def test_dataloader(self):
@@ -224,5 +205,5 @@ class Net(pl.LightningModule):
             ),
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
