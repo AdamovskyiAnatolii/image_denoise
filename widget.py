@@ -135,7 +135,7 @@ class Widget:
         noisy, clean = dataset[self.image_index.value]
         noisy = noisy.numpy().transpose((1, 2, 0))
         clean = clean.numpy().transpose((1, 2, 0))
-        f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 16))
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 8))
         ax1.imshow(noisy)
         ax1.set_title("Noisy")
         ax2.imshow(clean)
