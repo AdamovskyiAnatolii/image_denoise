@@ -49,11 +49,13 @@ class NoisyDataset(Dataset):
         return cropped_imgs
 
     def _add_gaussian_noise(self, image):
-        if isinstance(image, np.ndarray):
-            h, w, c = image.shape
-        else:
-            w, h = image.size
-            c = len(image.getbands())
+        image = np.array(image)
+        h, w, c = image.shape
+        # if isinstance(image, np.ndarray):
+        #     h, w, c = image.shape
+        # else:
+        #     w, h = image.size
+        #     c = len(image.getbands())
 
         if self.noise_static:
             std = self.noise_param
