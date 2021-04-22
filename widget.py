@@ -150,11 +150,13 @@ class Widget:
         print("Upload file")
         dataset = self._make_dataset()
 
-        clean = Image.open(
+        clean = np.array(Image.open(
             io.BytesIO(
                 self.file.value[list(self.file.value.keys())[0]]["content"]
             )
-        )
+        ))
+        if max(clean) > 1:
+            clean = clean / 255
         print("Add noise")
         noisy = dataset.corrupt_image(clean)
         print("Start clean")
