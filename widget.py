@@ -1,11 +1,12 @@
+import io
 import os
 
 import ipywidgets as widgets
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from piq import psnr
-import io
 from PIL import Image
+from piq import psnr
 
 from dataset import NoisyDataset
 
@@ -143,7 +144,7 @@ class Widget:
         self._save_image(noisy, clean, res)
         self._reload_image()
 
-        print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))
+        print(psnr(torch.Tensor(np.array(res).clip(0, 1)), torch.Tensor(clean)))
 
     def callback_upload(self, _):
         print("Upload file")
