@@ -133,11 +133,13 @@ class Widget:
         )
         if self.speed_radio.value == "long":
             if self.noise_type.value == "multiplicative_bernoulli":
-                res = model.replace(image, np.mean([m.run_one(image) for m in model.models], axis=0))
+                res = model.replace(image, np.mean(
+                    [model.run_one(image, inx=i) for i in range(len(model.models))], axis=0))
                 if model.gaussian_model is not None:
-                    res = model.replace(image, np.mean([m.run_one(res) for m in model.gaussian_model.models], axis=0))
+                    res = model.replace(image, np.mean(
+                        [model.gaussian_model.run_one(res, inx=i) for i in range(len(model.gaussian_model.models))], axis=0))
             else:
-                res = np.mean([m.run_one(image) for m in model.models], axis=0)
+                res = np.mean([model.run_one(image, inx=i) for i in range(len(model.models))], axis=0)
                 if model.add_noise:
                     res = model.add_input_noise(image, res)
         elif self.speed_radio.value == "medium":
