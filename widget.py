@@ -175,6 +175,8 @@ class Widget:
                 self.file.value[list(self.file.value.keys())[0]]["content"]
             )
         ))
+        for key in self.file.value:
+            self.file.value[key] = {}
         noisy = dataset.corrupt_image(clean)
         if np.max(clean) > 1:
             clean = clean / 255
