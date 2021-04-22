@@ -49,6 +49,7 @@ class NoisyDataset(Dataset):
         return cropped_imgs
 
     def _add_gaussian_noise(self, image):
+        print('Add gaussian noise')
         image = np.array(image)
         h, w, c = image.shape
         # if isinstance(image, np.ndarray):
@@ -68,6 +69,7 @@ class NoisyDataset(Dataset):
         return Image.fromarray(noisy_image)
 
     def _add_m_bernoulli_noise(self, image):
+        print('Add bernoulli noise')
         w, h, _ = np.array(image).shape
         if self.noise_static:
             prob_ = self.noise_param
