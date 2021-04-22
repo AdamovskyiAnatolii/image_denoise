@@ -50,7 +50,7 @@ class NoisyDataset(Dataset):
 
     def _add_gaussian_noise(self, image):
         if isinstance(image, np.ndarray):
-            w, h, c = image.shape
+            h, w, c = image.shape
         else:
             w, h = image.size
             c = len(image.getbands())
