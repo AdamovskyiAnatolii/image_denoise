@@ -163,7 +163,7 @@ class Widget:
         self._save_image(noisy, clean, res)
         self._reload_image()
 
-        print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))
+        print(psnr(torch.Tensor(np.array(res).clip(0, 1)), torch.Tensor(clean)))
 
     def _reload_image(self):
         with open("rand_fname.png", "rb") as file:
