@@ -155,10 +155,10 @@ class Widget:
                 self.file.value[list(self.file.value.keys())[0]]["content"]
             )
         ))
+        noisy = dataset.corrupt_image(clean)
         if np.max(clean) > 1:
             clean = clean / 255
-        print("Add noise")
-        noisy = dataset.corrupt_image(clean)
+            noisy = noisy / 255
         print("Start clean")
         res = self.run_model_upload(noisy)
         print("End clean")
