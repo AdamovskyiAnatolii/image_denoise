@@ -118,6 +118,20 @@ class Widget:
             else self.gaussian_model
         )
         if self.speed_radio.value == "long":
+            res = model(image)
+        elif self.speed_radio.value == "medium":
+            res = model.run_one(image)
+        else:
+            res = model.run_one(image)
+        return res
+
+    def run_model_upload(self, image):
+        model = (
+            self.bernoulli_model
+            if self.noise_type.value == "multiplicative_bernoulli"
+            else self.gaussian_model
+        )
+        if self.speed_radio.value == "long":
             if self.noise_type.value == "multiplicative_bernoulli":
                 res = model.replace(image, np.mean([m.run_one(image) for m in model.models], axis=0))
                 if model.gaussian_model is not None:
@@ -135,20 +149,6 @@ class Widget:
                 res = np.mean([m.run_one(image) for m in model.models], axis=0)
                 if model.add_noise:
                     res = model.add_input_noise(image, res)
-        else:
-            res = model.run_one(image)
-        return res
-
-    def run_model_upload(self, image):
-        model = (
-            self.bernoulli_model
-            if self.noise_type.value == "multiplicative_bernoulli"
-            else self.gaussian_model
-        )
-        if self.speed_radio.value == "long":
-            res = model(image)
-        elif self.speed_radio.value == "medium":
-            res = model.run_one(image)
         else:
             res = model.run_one(image)
         return res
