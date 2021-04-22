@@ -82,7 +82,7 @@ class Widget:
         self.speed_radio.observe(self.callback, names="value")
         self.image_index.observe(self.callback, names="value")
         self.dataset_name.observe(self.callback, names="value")
-        self.dataset_name.observe(self.callback_upload, names="value")
+        self.file.observe(self.callback_upload, names="value")
 
         self.accordion = widgets.Accordion(
             children=[
