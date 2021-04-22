@@ -179,10 +179,11 @@ class Widget:
         ))
         for key in self.file.value:
             self.file.value[key] = {}
+
         noisy = dataset.corrupt_image(clean)
         if np.max(clean) > 1:
-            clean = clean / 255
-            noisy = noisy / 255
+            clean = np.array(clean) / 255
+            noisy = np.array(noisy) / 255
         print("Start clean")
         res = self.run_model_upload(noisy)
         print("End clean")
