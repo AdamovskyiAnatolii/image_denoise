@@ -120,7 +120,7 @@ class Widget:
         if self.speed_radio.value == "long":
             res = model(image)
         elif self.speed_radio.value == "medium":
-            res = model.run_one(image)
+            res = model.run_all_d4(image)
         else:
             res = model.run_one(image)
         return res
