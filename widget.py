@@ -146,6 +146,7 @@ class Widget:
         print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))
 
     def callback_upload(self, _):
+        print("Upload file")
         dataset = self._make_dataset()
 
         clean = Image.open(
@@ -153,9 +154,11 @@ class Widget:
                 self.file.value[list(self.file.value.keys())[0]]["content"]
             )
         )
+        print("Add noise")
         noisy = dataset.corrupt_image(clean)
-
+        print("Start clean")
         res = self.run_model_upload(noisy)
+        print("End clean")
         self._save_image(noisy, clean, res)
         self._reload_image()
 
