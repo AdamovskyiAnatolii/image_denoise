@@ -4,6 +4,8 @@ import ipywidgets as widgets
 import torch
 from matplotlib import pyplot as plt
 from piq import psnr
+import io
+from PIL import Image
 
 from dataset import NoisyDataset
 
@@ -46,7 +48,10 @@ class Widget:
             readout_format="d",
         )
         self.dataset_name = widgets.RadioButtons(
-            options=[os.path.join("datasets", path) for path in os.listdir("datasets")],
+            options=[
+                os.path.join("datasets", path)
+                for path in os.listdir("datasets")
+            ],
             description="Dataset name:",
             disabled=False,
         )
@@ -65,6 +70,7 @@ class Widget:
         self.crop_seed = widgets.Checkbox(
             value=False, description="Random crop", disabled=False, indent=False
         )
+        self.file = widgets.FileUpload(accept="", multiple=False)
         with open("rand_fname.png", "rb") as file:
             self.img_widget = widgets.Image(
                 value=file.read(), format="png", width=600, height=1200,
@@ -76,6 +82,7 @@ class Widget:
         self.speed_radio.observe(self.callback, names="value")
         self.image_index.observe(self.callback, names="value")
         self.dataset_name.observe(self.callback, names="value")
+        self.dataset_name.observe(self.callback_upload, names="value")
 
         self.accordion = widgets.Accordion(
             children=[
@@ -87,6 +94,7 @@ class Widget:
                 self.img_widget,
                 self.crop_seed,
                 self.dataset_name,
+                self.file,
             ],
         )
         self.accordion.set_title(0, "Noise type")
@@ -97,6 +105,7 @@ class Widget:
         self.accordion.set_title(5, "Image")
         self.accordion.set_title(6, "Random crop")
         self.accordion.set_title(7, "Dataset name")
+        self.accordion.set_title(8, "Upload file")
 
     def show(self):
         return self.accordion
@@ -115,7 +124,48 @@ class Widget:
             res = model.run_one(image)
         return res
 
+    def run_model_upload(self, image):
+        model = (
+            self.bernoulli_model
+            if self.noise_type.value == "multiplicative_bernoulli"
+            else self.gaussian_model
+        )
+        return model.run_one(image)
+
     def callback(self, _):
+        dataset = self._make_dataset()
+
+        noisy, clean = dataset[self.image_index.value]
+        noisy = noisy.numpy().transpose((1, 2, 0))
+        clean = clean.numpy().transpose((1, 2, 0))
+
+        res = self.run_model(noisy)
+        self._save_image(noisy, clean, res)
+        self._reload_image()
+
+        print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))
+
+    def callback_upload(self, _):
+        dataset = self._make_dataset()
+
+        clean = Image.open(
+            io.BytesIO(
+                self.file.value[list(self.file.value.keys())[0]]["content"]
+            )
+        )
+        noisy = dataset.corrupt_image(clean)
+
+        res = self.run_model_upload(noisy)
+        self._save_image(noisy, clean, res)
+        self._reload_image()
+
+        print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))
+
+    def _reload_image(self):
+        with open("rand_fname.png", "rb") as file:
+            self.img_widget.value = file.read()
+
+    def _make_dataset(self):
         noise_level = (
             self.bernoulli_noise_level.value
             if self.noise_type.value == "multiplicative_bernoulli"
@@ -124,7 +174,7 @@ class Widget:
         print(
             f"Run: inx= {self.image_index.value}, speed = {self.speed_radio.value}, noise = {noise_level}"
         )
-        dataset = NoisyDataset(
+        return NoisyDataset(
             self.dataset_name.value,
             crop_size=128,
             clean_target=True,
@@ -132,20 +182,15 @@ class Widget:
             noise_static=True,
             crop_seed=42 if not self.crop_seed.value else None,
         )
-        noisy, clean = dataset[self.image_index.value]
-        noisy = noisy.numpy().transpose((1, 2, 0))
-        clean = clean.numpy().transpose((1, 2, 0))
+
+    @staticmethod
+    def _save_image(noisy, clean, pred):
         f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 8))
         ax1.imshow(noisy)
         ax1.set_title("Noisy")
         ax2.imshow(clean)
         ax2.set_title("Clean")
-        res = self.run_model(noisy)
-        ax3.imshow(res.clip(0, 1))
+        ax3.imshow(pred.clip(0, 1))
         ax3.set_title("Predicted")
         f.savefig("rand_fname.png")
         plt.close(f)
-
-        with open("rand_fname.png", "rb") as file:
-            self.img_widget.value = file.read()
-        print(psnr(torch.Tensor(res.clip(0, 1)), torch.Tensor(clean)))

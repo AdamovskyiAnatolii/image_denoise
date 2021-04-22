@@ -63,12 +63,12 @@ class NoisyDataset(Dataset):
         return Image.fromarray(noisy_image)
 
     def _add_m_bernoulli_noise(self, image):
-        sz = np.array(image).shape[0]
+        w, h, _ = np.array(image).shape
         if self.noise_static:
             prob_ = self.noise_param
         else:
             prob_ = random.uniform(0, self.noise_param)
-        mask = np.random.choice([0, 1], size=(sz, sz), p=[prob_, 1 - prob_])
+        mask = np.random.choice([0, 1], size=(w, h), p=[prob_, 1 - prob_])
         mask = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
         return np.multiply(image, mask).astype(np.uint8)
 
